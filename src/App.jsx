@@ -138,7 +138,7 @@ function Hero() {
         </div>
       </div>
 
-      {/* UNIQUE HERO VISUAL */}
+
 
       <div className="hero-visual">
         <div className="orbit-scene">
@@ -379,6 +379,43 @@ function Experience() {
 }
 
 function Contact() {
+  const [status, setStatus] = useState("");
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    const form = event.target;
+    const formData = new FormData(form);
+
+    setStatus("Sending...");
+
+    try {
+      const response = await fetch(
+        "https://formspree.io/f/mrpbjoon",
+        {
+          method: "POST",
+          body: formData,
+          headers: {
+            Accept: "application/json",
+          },
+        }
+      );
+
+      if (response.ok) {
+        setStatus("Message sent successfully! ✦");
+        form.reset();
+      } else {
+        setStatus(
+          "Something went wrong. Please try again."
+        );
+      }
+    } catch (error) {
+      setStatus(
+        "Something went wrong. Please try again."
+      );
+    }
+  };
+
   return (
     <section id="contact" className="contact">
       <div className="contact-inner">
@@ -402,8 +439,7 @@ function Contact() {
 
         <form
           className="feedback-form"
-          action="https://formspree.io/f/mrpbjoon"
-          method="POST"
+          onSubmit={handleSubmit}
         >
           <div className="form-row">
             <div className="form-group">
@@ -454,12 +490,6 @@ function Contact() {
             ></textarea>
           </div>
 
-          <input
-            type="hidden"
-            name="_subject"
-            value="New Portfolio Contact"
-          />
-
           <button
             type="submit"
             className="feedback-button"
@@ -467,6 +497,12 @@ function Contact() {
             Send Message
             <span>↗</span>
           </button>
+
+          {status && (
+            <p className="form-status">
+              {status}
+            </p>
+          )}
         </form>
       </div>
     </section>
