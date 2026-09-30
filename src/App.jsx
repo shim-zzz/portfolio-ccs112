@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import "./App.css";
-import { useForm, ValidationError } from '@formspree/react';
 
 const projects = [
   {
@@ -138,8 +137,6 @@ function Hero() {
         </div>
       </div>
 
-
-
       <div className="hero-visual">
         <div className="orbit-scene">
           <div className="orbit orbit-one"></div>
@@ -210,16 +207,17 @@ function About() {
 
         <div className="about-content">
           <p>
-          I'm a student who enjoys exploring technology and building things that turn ideas into something real.
-          Most of what I create comes from curiosity and a
-          desire to learn something new.
+            I'm a student who enjoys exploring technology and
+            building things that turn ideas into something real.
+            Most of what I create comes from curiosity and a
+            desire to learn something new.
           </p>
 
           <p>
-          I'm still growing as a developer, and I enjoy
-          experimenting with different ideas, working on
-          personal projects, and learning from every project
-          I take on.
+            I'm still growing as a developer, and I enjoy
+            experimenting with different ideas, working on
+            personal projects, and learning from every project
+            I take on.
           </p>
 
           <a href="#projects" className="text-link">
@@ -260,7 +258,9 @@ function Skills() {
                 0{index + 1}
               </span>
 
-              <span className="skill-name">{skill}</span>
+              <span className="skill-name">
+                {skill}
+              </span>
 
               <span className="skill-arrow">↗</span>
             </div>
@@ -276,6 +276,7 @@ function Projects() {
     <section id="projects" className="section">
       <div className="section-top">
         <span className="section-number">03</span>
+
         <span className="section-label">
           SELECTED PROJECTS
         </span>
@@ -294,7 +295,10 @@ function Projects() {
 
       <div className="projects-grid">
         {projects.map((project, index) => (
-          <article className="project-card" key={project.title}>
+          <article
+            className="project-card"
+            key={project.title}
+          >
             <div className="project-image">
               <div className="project-number">
                 0{index + 1}
@@ -380,14 +384,16 @@ function Experience() {
 
 function Contact() {
   const [status, setStatus] = useState("");
+  const [sending, setSending] = useState(false);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const form = event.target;
+    const form = event.currentTarget;
     const formData = new FormData(form);
 
-    setStatus("Sending...");
+    setSending(true);
+    setStatus("");
 
     try {
       const response = await fetch(
@@ -402,17 +408,35 @@ function Contact() {
       );
 
       if (response.ok) {
-        setStatus("Message sent successfully! ✦");
         form.reset();
-      } else {
+
         setStatus(
-          "Something went wrong. Please try again."
+          "Message sent successfully! ✦"
         );
+      } else {
+        let errorMessage =
+          "Something went wrong. Please try again.";
+
+        try {
+          const data = await response.json();
+
+          if (data?.errors?.length) {
+            errorMessage = data.errors
+              .map((error) => error.message)
+              .join(", ");
+          }
+        } catch {
+          // Keep the default error message.
+        }
+
+        setStatus(errorMessage);
       }
     } catch (error) {
       setStatus(
-        "Something went wrong. Please try again."
+        "Unable to send your message. Please try again."
       );
+    } finally {
+      setSending(false);
     }
   };
 
@@ -493,13 +517,21 @@ function Contact() {
           <button
             type="submit"
             className="feedback-button"
+            disabled={sending}
           >
-            Send Message
-            <span>↗</span>
+            {sending ? "Sending..." : "Send Message"}
+
+            {!sending && <span>↗</span>}
           </button>
 
           {status && (
-            <p className="form-status">
+            <p
+              className={
+                status.includes("successfully")
+                  ? "form-status success"
+                  : "form-status error"
+              }
+            >
               {status}
             </p>
           )}
@@ -561,7 +593,6 @@ function Footer() {
   );
 }
 
-
 function App() {
   const [showTop, setShowTop] = useState(false);
 
@@ -570,10 +601,16 @@ function App() {
       setShowTop(window.scrollY > 500);
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener(
+      "scroll",
+      handleScroll
+    );
 
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener(
+        "scroll",
+        handleScroll
+      );
     };
   }, []);
 
